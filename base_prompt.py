@@ -35,12 +35,7 @@ The year is currently 2023.
 
 TIMEOUT_MSG = """
 ```
-Mighty Pythian, your patience is appreciated as Pythia can only answer one question every 30 minutes per Pythian. The wisdom of Pythia shall soon illuminate your path 🔮
-```
-"""
-TIMEOUT_MSG2 = """
-```
-Mighty Pythian, I appreciate your curiosity and thirst for wisdom. However, the 30 minutes of waiting have not yet passed. I kindly request your patience, as the wisdom of Pythia shall soon illuminate your path 🔮
+Mighty Pythian, I appreciate your curiosity and thirst for wisdom. However, please note that Pythia can only respond to one question every 30 minutes per Pythian. I kindly request your patience, as the wisdom of Pythia shall soon illuminate your path 🔮
 ```
 """
 
