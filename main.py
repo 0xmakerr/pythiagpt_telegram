@@ -2,29 +2,19 @@ import logging
 import asyncio
 import os
 from time import time
-from functools import wraps
 from dotenv import load_dotenv
 from base_prompt import TIMEOUT_MSG
 from pythgpt import pyth_gpt
+from telegrambot import FilterChat, send_action
 from telegram import Update
-from telegram.ext import ContextTypes, ApplicationHandlerStop, Application, CommandHandler
+from telegram.ext import ContextTypes, ApplicationHandlerStop, Application, MessageHandler, filters
 from telegram.constants import ChatAction
 
 load_dotenv()
 TELEGRAM_API_KEY = os.getenv('TELEGRAM_API_KEY')
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 MAX_USAGE = 1
-
-
-def send_action(action):
-    """Sends `action` while processing func command."""
-    def decorator(func):
-        @wraps(func)
-        async def command_func(update, context, *args, **kwargs):
-            await context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=action)
-            return await func(update, context, *args, **kwargs)
-        return command_func
-    return decorator
+filter_chat = FilterChat()
 
 
 @send_action(ChatAction.TYPING)
@@ -37,7 +27,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.edit_message_text(chat_id=placeholder_message.chat_id, message_id=placeholder_message.message_id, parse_mode="Markdown", text=answer)
 
 
-async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     count = context.user_data.get("usageCount", 0)
     restrict_since = context.user_data.get("restrictSince", 0)
 
@@ -54,10 +44,10 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     app = Application.builder().token(TELEGRAM_API_KEY).build()
 
-    handler = CommandHandler('chat', callback)
-    app.add_handler(handler, -1)
+    timeout_handler = MessageHandler(filters.Entity(entity_type="mention") | filter_chat, timeout)
+    app.add_handler(timeout_handler, -1)
 
-    start_handler = CommandHandler('chat', chat)
-    app.add_handler(start_handler, 0)
+    mention_handler = MessageHandler(filters.Entity(entity_type="mention") | filter_chat, chat)
+    app.add_handler(mention_handler, 0)
 
     app.run_polling()
