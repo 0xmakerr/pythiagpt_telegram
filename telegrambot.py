@@ -1,10 +1,4 @@
-from telegram.ext.filters import MessageFilter
 from functools import wraps
-
-
-class FilterChat(MessageFilter):
-    def filter(self, message):
-        return '/chat' in message.text
 
 
 def send_action(action):
