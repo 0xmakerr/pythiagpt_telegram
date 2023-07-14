@@ -51,4 +51,4 @@ if __name__ == '__main__':
     chat_handler = MessageHandler(filters.Entity(entity_type="mention") | filters.Regex(re.compile('^/chat', re.IGNORECASE)), chat)
     app.add_handler(chat_handler, 0)
 
-    app.run_polling()
+    app.run_polling(drop_pending_updates="True")
