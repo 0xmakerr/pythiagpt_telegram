@@ -4,7 +4,7 @@ import os
 import re
 from time import time
 from dotenv import load_dotenv
-from base_prompt import TIMEOUT_MSG
+from base_prompt import TIMEOUT_MSG, INTRODUCTION_MSG
 from pythgpt import pyth_gpt
 from telegrambot import send_action
 from telegram import Update
@@ -42,13 +42,20 @@ async def timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["usageCount"] = count + 1
 
 
+async def introduction(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=update.effective_chat.id, parse_mode="Markdown", text=INTRODUCTION_MSG)
+
+
 if __name__ == '__main__':
     app = Application.builder().token(TELEGRAM_API_KEY).build()
 
-    timeout_handler = MessageHandler(filters.Entity(entity_type="mention") | filters.Regex(re.compile('^/chat', re.IGNORECASE)), timeout)
+    timeout_handler = MessageHandler(filters.Regex(re.compile('^@pythiagpt_bot ', re.IGNORECASE)) | filters.Regex(re.compile('^/chat ', re.IGNORECASE)), timeout)
     app.add_handler(timeout_handler, -1)
 
-    chat_handler = MessageHandler(filters.Entity(entity_type="mention") | filters.Regex(re.compile('^/chat', re.IGNORECASE)), chat)
+    chat_handler = MessageHandler(filters.Regex(re.compile('^@pythiagpt_bot ', re.IGNORECASE)) | filters.Regex(re.compile('^/chat ', re.IGNORECASE)), chat)
     app.add_handler(chat_handler, 0)
+
+    start_handler = MessageHandler(filters.Regex(re.compile('^/start', re.IGNORECASE)), introduction)
+    app.add_handler(start_handler, 1)
 
     app.run_polling(drop_pending_updates="True")
